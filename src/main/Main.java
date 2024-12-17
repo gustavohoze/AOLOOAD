@@ -1,6 +1,5 @@
 package main;
 
-import dao.UserDAO;
 import controller.UserController;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -17,8 +16,6 @@ public class Main extends Application {
             // Initialize database connection
             Connection connection = DatabaseConnection.getInstance().getConnection();
 
-            // Create DAO and Controller instances
-            UserDAO userDAO = new UserDAO(connection);
             UserController userController = new UserController();  // Create controller instance
 
             // Start with the LoginView

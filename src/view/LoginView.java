@@ -4,28 +4,43 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import model.User;
 import controller.UserController;
 
 public class LoginView {
-    private UserController userController;  // Use UserController instead of UserDAO
+    private UserController userController;
 
     public LoginView(UserController userController) {
-        this.userController = userController;  // Initialize UserController
+        this.userController = userController;
     }
 
     public void display(Stage stage) {
         // Create UI components
         Label emailLabel = new Label("Email:");
+        emailLabel.setFont(Font.font("Arial", 14));
+
         TextField emailField = new TextField();
+        emailField.setPromptText("Enter your email");
+        emailField.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #cccccc; -fx-padding: 5px;");
+
         Label passwordLabel = new Label("Password:");
+        passwordLabel.setFont(Font.font("Arial", 14));
+
         PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText("Enter your password");
+        passwordField.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #cccccc; -fx-padding: 5px;");
 
         Button loginButton = new Button("Login");
-        Button goToRegisterButton = new Button("Register");
+        loginButton.setStyle("-fx-background-color: #0078d7; -fx-text-fill: white; -fx-font-size: 14px; -fx-cursor: hand;");
+        loginButton.setPrefWidth(150);
 
+        Button goToRegisterButton = new Button("Doesn't have an account? Register here!");
+        goToRegisterButton.setStyle("-fx-background-color: transparent; -fx-text-fill: grey; -fx-font-size: 14px; -fx-cursor: hand;");
+        goToRegisterButton.setPrefWidth(300);
         // Event Handling
         loginButton.setOnAction(e -> {
             String email = emailField.getText().trim();
@@ -39,7 +54,6 @@ public class LoginView {
             try {
                 User user = userController.login(email, password); // Use the UserController to validate login
                 showAlert(Alert.AlertType.INFORMATION, "Login Success", "Login successful!");
-                // Proceed to the next view or action here
                 new UpdateProfileView(userController, user).display(stage); // Pass UserController and User to the next view
             } catch (IllegalArgumentException ex) {
                 showAlert(Alert.AlertType.ERROR, "Login Error", ex.getMessage()); // Show error if login fails
@@ -50,12 +64,15 @@ public class LoginView {
             new RegisterView(userController).display(stage); // Pass UserController to RegisterView
         });
 
-        // Layout setup
-        VBox layout = new VBox(10, emailLabel, emailField, passwordLabel, passwordField, loginButton, goToRegisterButton);
-        layout.setPadding(new Insets(20));
+        // Styling the layout
+        VBox layout = new VBox(15); // Adjusted spacing between elements
+        layout.getChildren().addAll(emailLabel, emailField, passwordLabel, passwordField, loginButton, goToRegisterButton);
+        layout.setPadding(new Insets(30));
         layout.setAlignment(Pos.CENTER);
+        layout.setStyle("-fx-background-color: #ffffff;");
 
-        Scene scene = new Scene(layout, 400, 400);
+        Scene scene = new Scene(layout, 500, 500, Color.WHITE);
+
         stage.setScene(scene);
         stage.setTitle("Login");
     }

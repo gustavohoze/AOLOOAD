@@ -6,6 +6,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import model.User;
 
@@ -14,22 +16,43 @@ public class UpdateProfileView {
     private User currentUser;
 
     public UpdateProfileView(UserController userController, User currentUser) {
-        this.userController = userController;  // Initialize UserController
-        this.currentUser = currentUser;        // Initialize the current user
+        this.userController = userController;
+        this.currentUser = currentUser;
     }
 
     public void display(Stage stage) {
         // Create UI components
         Label emailLabel = new Label("New Email:");
+        emailLabel.setFont(Font.font("Arial", 14));
+
         TextField emailField = new TextField();
+        emailField.setPromptText("Enter new email");
+        emailField.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #cccccc; -fx-padding: 5px;");
+
         Label usernameLabel = new Label("New Username:");
+        usernameLabel.setFont(Font.font("Arial", 14));
+
         TextField usernameField = new TextField();
+        usernameField.setPromptText("Enter new username");
+        usernameField.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #cccccc; -fx-padding: 5px;");
+
         Label oldPasswordLabel = new Label("Old Password:");
+        oldPasswordLabel.setFont(Font.font("Arial", 14));
+
         PasswordField oldPasswordField = new PasswordField();
+        oldPasswordField.setPromptText("Enter old password");
+        oldPasswordField.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #cccccc; -fx-padding: 5px;");
+
         Label newPasswordLabel = new Label("New Password:");
+        newPasswordLabel.setFont(Font.font("Arial", 14));
+
         PasswordField newPasswordField = new PasswordField();
+        newPasswordField.setPromptText("Enter new password");
+        newPasswordField.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #cccccc; -fx-padding: 5px;");
 
         Button updateButton = new Button("Update");
+        updateButton.setStyle("-fx-background-color: #0078d7; -fx-text-fill: white; -fx-font-size: 14px; -fx-cursor: hand;");
+        updateButton.setPrefWidth(150);
 
         // Event Handling for update
         updateButton.setOnAction(e -> {
@@ -39,26 +62,31 @@ public class UpdateProfileView {
                 String oldPassword = oldPasswordField.getText().trim();
                 String newPassword = newPasswordField.getText().trim();
 
-                // Check if the inputs are valid (this could throw an IllegalArgumentException)
                 userController.checkChangeProfileInput(newEmail, newUsername, oldPassword, newPassword);
 
-                // Attempt to change the profile (no return value from changeProfile method)
                 userController.changeProfile(currentUser, newEmail, newUsername, oldPassword, newPassword);
 
-                // If no exception was thrown, profile update is successful
                 showAlert(Alert.AlertType.INFORMATION, "Profile Updated", "Your profile has been successfully updated.");
             } catch (IllegalArgumentException ex) {
-                // Show error if validation fails or any issues occur
                 showAlert(Alert.AlertType.ERROR, "Error", ex.getMessage());
             }
         });
 
         // Layout setup
-        VBox layout = new VBox(10, emailLabel, emailField, usernameLabel, usernameField, oldPasswordLabel, oldPasswordField, newPasswordLabel, newPasswordField, updateButton);
-        layout.setPadding(new Insets(20));
+        VBox layout = new VBox(15); // Adjusted spacing between elements
+        layout.getChildren().addAll(
+                emailLabel, emailField, 
+                usernameLabel, usernameField, 
+                oldPasswordLabel, oldPasswordField, 
+                newPasswordLabel, newPasswordField, 
+                updateButton
+        );
+        layout.setPadding(new Insets(30));
         layout.setAlignment(Pos.CENTER);
+        layout.setStyle("-fx-background-color: #ffffff;");
 
-        Scene scene = new Scene(layout, 400, 400);
+        Scene scene = new Scene(layout, 500, 500, Color.WHITE);
+
         stage.setScene(scene);
         stage.setTitle("Update Profile");
     }
