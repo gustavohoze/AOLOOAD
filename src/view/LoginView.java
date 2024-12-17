@@ -1,6 +1,5 @@
 package view;
 
-import dao.UserDAO;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -8,18 +7,12 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.User;
-import javafx.application.Platform;
-
-import java.util.Optional;
-
 import controller.UserController;
 
 public class LoginView {
-    private UserDAO userDAO;
-    private UserController userController;  // Add UserController
+    private UserController userController;  // Use UserController instead of UserDAO
 
-    public LoginView(UserDAO userDAO, UserController userController) {
-        this.userDAO = userDAO;
+    public LoginView(UserController userController) {
         this.userController = userController;  // Initialize UserController
     }
 
@@ -43,19 +36,18 @@ public class LoginView {
                 return;
             }
 
-            Optional<User> userOptional = userDAO.validateLogin(email, password);
-            if (userOptional.isPresent()) {
+            try {
+                User user = userController.login(email, password); // Use the UserController to validate login
                 showAlert(Alert.AlertType.INFORMATION, "Login Success", "Login successful!");
                 // Proceed to the next view or action here
-                User user = userOptional.get();
-                new UpdateProfileView(userDAO, userController,user).display(stage);
-            } else {
-                showAlert(Alert.AlertType.ERROR, "Login Error", "Invalid credentials.");
+                new UpdateProfileView(userController, user).display(stage); // Pass UserController and User to the next view
+            } catch (IllegalArgumentException ex) {
+                showAlert(Alert.AlertType.ERROR, "Login Error", ex.getMessage()); // Show error if login fails
             }
         });
 
         goToRegisterButton.setOnAction(e -> {
-            new RegisterView(userDAO, userController).display(stage);
+            new RegisterView(userController).display(stage); // Pass UserController to RegisterView
         });
 
         // Layout setup

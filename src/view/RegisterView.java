@@ -1,7 +1,6 @@
 package view;
 
 import controller.UserController;
-import dao.UserDAO;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,12 +10,10 @@ import javafx.stage.Stage;
 import model.User;
 
 public class RegisterView {
-    private UserDAO userDAO;
-    private UserController userController;
+    private UserController userController; // Remove UserDAO, only use UserController
 
-    public RegisterView(UserDAO userDAO, UserController userController) {
-        this.userDAO = userDAO;
-        this.userController = userController;
+    public RegisterView(UserController userController) {
+        this.userController = userController; // Initialize UserController
     }
 
     public void display(Stage stage) {
@@ -29,7 +26,7 @@ public class RegisterView {
         PasswordField passwordField = new PasswordField();
         Label roleLabel = new Label("Role:");
         ComboBox<String> roleComboBox = new ComboBox<>();
-        roleComboBox.getItems().addAll("Admin", "User");
+        roleComboBox.getItems().addAll("Admin", "Guest", "Event Organizer", "Vendor");
 
         Button registerButton = new Button("Register");
         Button goToLoginButton = new Button("Login");
@@ -46,28 +43,21 @@ public class RegisterView {
                 String password = passwordField.getText().trim();
                 String role = roleComboBox.getValue();
 
+                // Validate inputs through UserController
+                userController.checkRegisterInput(email, username, password); // Validation
+
+                // Check if role is selected
                 if (role == null) {
                     throw new IllegalArgumentException("Role must be selected.");
                 }
 
-                User user = new User(email, username, password, role);
+                User user = new User(email, username, password, role); // Create user object
 
-                // Use controller to check if email or username is taken
-                if (userDAO.isEmailTaken(email)) {
-                    showAlert(Alert.AlertType.ERROR, "Registration Failed", "Email is already in use.");
-                    return;
-                }
-                if (userDAO.isUsernameTaken(username)) {
-                    showAlert(Alert.AlertType.ERROR, "Registration Failed", "Username is already in use.");
-                    return;
-                }
+                // Register the user using UserController
+                userController.register(email, username, password, role); // Registration logic
 
-                if (userDAO.registerUser(user)) {
-                    showAlert(Alert.AlertType.INFORMATION, "Registration Successful", "User registered successfully!");
-                    new LoginView(userDAO, userController).display(stage); // Go to login view after successful registration
-                } else {
-                    showAlert(Alert.AlertType.ERROR, "Registration Failed", "Failed to register user.");
-                }
+                showAlert(Alert.AlertType.INFORMATION, "Registration Successful", "User registered successfully!");
+                new LoginView(userController).display(stage); // Go to login view after successful registration
             } catch (IllegalArgumentException ex) {
                 showAlert(Alert.AlertType.ERROR, "Error", ex.getMessage());
             }
@@ -75,7 +65,7 @@ public class RegisterView {
 
         // Event Handling for login redirection
         goToLoginButton.setOnAction(e -> {
-            new LoginView(userDAO, userController).display(stage);
+            new LoginView(userController).display(stage); // Go to login view
         });
 
         // Layout setup

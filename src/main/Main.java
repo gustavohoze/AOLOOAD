@@ -19,10 +19,10 @@ public class Main extends Application {
 
             // Create DAO and Controller instances
             UserDAO userDAO = new UserDAO(connection);
-            UserController userController = new UserController(userDAO);  // Create controller instance
+            UserController userController = new UserController();  // Create controller instance
 
             // Start with the LoginView
-            LoginView loginView = new LoginView(userDAO, userController);  // Pass both DAO and Controller
+            LoginView loginView = new LoginView(userController);  // Pass both DAO and Controller
             loginView.display(primaryStage);
 
             primaryStage.setTitle("User Management System");

@@ -1,7 +1,6 @@
 package view;
 
 import controller.UserController;
-import dao.UserDAO;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,14 +10,12 @@ import javafx.stage.Stage;
 import model.User;
 
 public class UpdateProfileView {
-    private UserDAO userDAO;
     private UserController userController;
     private User currentUser;
 
-    public UpdateProfileView(UserDAO userDAO, UserController userController, User currentUser) {
-        this.userDAO = userDAO;
-        this.userController = userController;
-        this.currentUser = currentUser;
+    public UpdateProfileView(UserController userController, User currentUser) {
+        this.userController = userController;  // Initialize UserController
+        this.currentUser = currentUser;        // Initialize the current user
     }
 
     public void display(Stage stage) {
@@ -42,22 +39,16 @@ public class UpdateProfileView {
                 String oldPassword = oldPasswordField.getText().trim();
                 String newPassword = newPasswordField.getText().trim();
 
-                if (!newEmail.isEmpty()) {
-                    userController.updateEmail(currentUser, newEmail);
-                }
-                if (!newUsername.isEmpty()) {
-                    userController.updateUsername(currentUser, newUsername);
-                }
-                if (!newPassword.isEmpty() && !oldPassword.isEmpty()) {
-                    userController.updatePassword(currentUser, oldPassword, newPassword);
-                }
+                // Check if the inputs are valid (this could throw an IllegalArgumentException)
+                userController.checkChangeProfileInput(newEmail, newUsername, oldPassword, newPassword);
 
-                if (userController.updateUser(currentUser)) {
-                    showAlert(Alert.AlertType.INFORMATION, "Profile Updated", "Your profile has been successfully updated.");
-                } else {
-                    showAlert(Alert.AlertType.ERROR, "Update Failed", "Failed to update profile. Please try again.");
-                }
+                // Attempt to change the profile (no return value from changeProfile method)
+                userController.changeProfile(currentUser, newEmail, newUsername, oldPassword, newPassword);
+
+                // If no exception was thrown, profile update is successful
+                showAlert(Alert.AlertType.INFORMATION, "Profile Updated", "Your profile has been successfully updated.");
             } catch (IllegalArgumentException ex) {
+                // Show error if validation fails or any issues occur
                 showAlert(Alert.AlertType.ERROR, "Error", ex.getMessage());
             }
         });
