@@ -8,6 +8,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import model.EventOrganizer;
 import model.User;
 import controller.UserController;
 
@@ -54,10 +55,29 @@ public class LoginView {
             try {
                 User user = userController.login(email, password); // Use the UserController to validate login
                 showAlert(Alert.AlertType.INFORMATION, "Login Success", "Login successful!");
-                new UpdateProfileView(userController, user).display(stage); // Pass UserController and User to the next view
+
+                // Redirect based on user role
+                switch (user.getRole()) {
+                    case "Guest":
+                        new GuestHomeView(user).start(stage); // Pass UserController and User to the Guest view
+                        break;
+                    case "Event Organizer":
+                        new EventOrganizerHomeView(user).start(stage); // Pass UserController and User to the Event Organizer view
+                        break;
+                    case "Admin":
+                        new AdminHomeView(user).start(stage); // Pass UserController and User to the Admin view
+                        break;
+                    case "Vendor":
+                        new VendorHomeView(user).start(stage); // Pass UserController and User to the Vendor view
+                        break;
+                    default:
+                        showAlert(Alert.AlertType.ERROR, "Login Error", "Unknown user role: " + user.getRole()); // Handle unknown roles
+                        break;
+                }
             } catch (IllegalArgumentException ex) {
                 showAlert(Alert.AlertType.ERROR, "Login Error", ex.getMessage()); // Show error if login fails
             }
+
         });
 
         goToRegisterButton.setOnAction(e -> {

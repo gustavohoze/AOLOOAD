@@ -6,6 +6,7 @@ import util.DatabaseConnection;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class UserController {
 
@@ -49,12 +50,14 @@ public class UserController {
     // Save user to the database
     private void saveUserToDatabase(User user) {
         try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
-            String query = "INSERT INTO users (email, username, password, role) VALUES (?, ?, ?, ?)";
+            String query = "INSERT INTO users (user_id, email, username, password, role) VALUES (?,?, ?, ?, ?)";
+            String userID = UUID.randomUUID().toString();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setString(1, user.getEmail());
-                stmt.setString(2, user.getUsername());
-                stmt.setString(3, user.getPassword()); // In real scenarios, hash the password before storing
-                stmt.setString(4, user.getRole());
+            	stmt.setString(1, userID);
+                stmt.setString(2, user.getEmail());
+                stmt.setString(3, user.getUsername());
+                stmt.setString(4, user.getPassword()); // In real scenarios, hash the password before storing
+                stmt.setString(5, user.getRole());
                 stmt.executeUpdate();
             }
         } catch (SQLException e) {
@@ -70,9 +73,9 @@ public class UserController {
                 stmt.setString(1, email);
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
-                    String storedPassword = rs.getString("password"); // In real apps, compare hashed passwords
+                    String storedPassword = rs.getString("password");
                     if (storedPassword.equals(password)) {
-                        return new User(rs.getString("id"), rs.getString("email"), rs.getString("username"),
+                        return new User(rs.getString("user_id"), rs.getString("email"), rs.getString("username"),
                                 storedPassword, rs.getString("role"));
                     } else {
                         throw new IllegalArgumentException("Invalid password.");
@@ -113,7 +116,7 @@ public class UserController {
             }
 
             // Update user profile in the database
-            String updateQuery = "UPDATE users SET email = ?, username = ?, password = ? WHERE id = ?";
+            String updateQuery = "UPDATE users SET email = ?, username = ?, password = ? WHERE user_id = ?";
             try (PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
                 stmt.setString(1, email);
                 stmt.setString(2, username);
@@ -140,7 +143,7 @@ public class UserController {
                 stmt.setString(1, email);
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
-                    return new User(rs.getString("id"), rs.getString("email"), rs.getString("username"),
+                    return new User(rs.getString("user_id"), rs.getString("email"), rs.getString("username"),
                             rs.getString("password"), rs.getString("role"));
                 }
             }
@@ -158,7 +161,7 @@ public class UserController {
                 stmt.setString(1, username);
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
-                    return new User(rs.getString("id"), rs.getString("email"), rs.getString("username"),
+                    return new User(rs.getString("user_id"), rs.getString("email"), rs.getString("username"),
                             rs.getString("password"), rs.getString("role"));
                 }
             }

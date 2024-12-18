@@ -4,7 +4,11 @@ import controller.UserController;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import util.DatabaseConnection;
+import view.AdminHomeView;
+import view.EventOrganizerHomeView;
+import view.GuestHomeView;
 import view.LoginView;
+import view.VendorHomeView;
 
 import java.sql.Connection;
 
@@ -19,10 +23,9 @@ public class Main extends Application {
             UserController userController = new UserController();  // Create controller instance
 
             // Start with the LoginView
-            LoginView loginView = new LoginView(userController);  // Pass both DAO and Controller
+            LoginView loginView = new LoginView(userController);  
             loginView.display(primaryStage);
-
-            primaryStage.setTitle("User Management System");
+            primaryStage.setTitle("StellarFest");
             primaryStage.setResizable(false); // Consistent size across views
             primaryStage.show();
         } catch (Exception e) {

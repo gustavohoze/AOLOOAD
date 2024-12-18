@@ -48,9 +48,11 @@ public class EventOrganizerController {
 
     // View all events organized by this organizer
     public void viewOrganizedEvents(String userID) {
+    	
         System.out.println("List of events organized by User ID " + userID + ":");
         String query = "SELECT event_id, event_name, event_date, event_location FROM events WHERE organizer_id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
+
             stmt.setString(1, userID);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
