@@ -1,15 +1,23 @@
 package controller;
 
+import model.EventOrganizer;
+import model.Guest;
 import model.User;
+import model.Vendor;
 import util.DatabaseConnection;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class UserController {
-
+	 private Connection conn;
+	 public UserController() {
+	        try {
+	            this.conn = DatabaseConnection.getInstance().getConnection();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
     // Register method (using MySQL)
     public User register(String email, String username, String password, String role) {
         checkRegisterInput(email, username, password);
@@ -18,7 +26,7 @@ public class UserController {
         }
 
         // Check if email or username already exists in the MySQL database
-        try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
+        try {
             String emailCheckQuery = "SELECT COUNT(*) FROM users WHERE email = ?";
             try (PreparedStatement stmt = conn.prepareStatement(emailCheckQuery)) {
                 stmt.setString(1, email);
@@ -38,7 +46,21 @@ public class UserController {
             }
 
             // Create a new user
-            User newUser = new User(email, username, password, role);
+            User newUser = null;
+            
+            switch (role) {
+                case "Event Organizer":
+                    newUser = new EventOrganizer(email, username, password, role);
+                    break;
+                case "Guest":
+                    newUser = new Guest(email, username, password, role);
+                    break;
+                case "Vendor":
+                    newUser = new Vendor(email, username, password, role);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid role selected.");
+            }
             saveUserToDatabase(newUser);
 
             return newUser;
@@ -49,7 +71,7 @@ public class UserController {
 
     // Save user to the database
     private void saveUserToDatabase(User user) {
-        try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
+        try  {
             String query = "INSERT INTO users (user_id, email, username, password, role) VALUES (?,?, ?, ?, ?)";
             String userID = UUID.randomUUID().toString();
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -67,7 +89,7 @@ public class UserController {
 
     // Login method (using MySQL)
     public User login(String email, String password) throws IllegalArgumentException {
-        try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
+        try {
             String query = "SELECT * FROM users WHERE email = ?";
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setString(1, email);
@@ -75,8 +97,21 @@ public class UserController {
                 if (rs.next()) {
                     String storedPassword = rs.getString("password");
                     if (storedPassword.equals(password)) {
-                        return new User(rs.getString("user_id"), rs.getString("email"), rs.getString("username"),
-                                storedPassword, rs.getString("role"));
+                        String role = rs.getString("role");
+                        // Create the correct subclass based on the role
+                        switch (role) {
+                            case "Event Organizer":
+                                return new EventOrganizer(rs.getString("user_id"), rs.getString("email"),
+                                        rs.getString("username"), storedPassword, role);
+                            case "Guest":
+                                return new Guest(rs.getString("user_id"), rs.getString("email"),
+                                        rs.getString("username"), storedPassword, role);
+                            case "Vendor":
+                                return new Vendor(rs.getString("user_id"), rs.getString("email"),
+                                        rs.getString("username"), storedPassword, role);
+                            default:
+                                throw new IllegalArgumentException("Invalid role found in database: " + role);
+                        }
                     } else {
                         throw new IllegalArgumentException("Invalid password.");
                     }
@@ -94,7 +129,7 @@ public class UserController {
         checkChangeProfileInput(email, username, oldPassword, newPassword);
 
         // Update the user's information in the database
-        try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
+        try {
             // Check if the email is already taken
             String emailCheckQuery = "SELECT COUNT(*) FROM users WHERE email = ?";
             try (PreparedStatement stmt = conn.prepareStatement(emailCheckQuery)) {
@@ -137,7 +172,7 @@ public class UserController {
 
     // Get user by email (from MySQL)
     public User getUserByEmail(String email) {
-        try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
+        try  {
             String query = "SELECT * FROM users WHERE email = ?";
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setString(1, email);
@@ -155,7 +190,7 @@ public class UserController {
 
     // Get user by username (from MySQL)
     public User getUserByUsername(String username) {
-        try (Connection conn = DatabaseConnection.getInstance().getConnection()) {
+        try  {
             String query = "SELECT * FROM users WHERE username = ?";
             try (PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.setString(1, username);

@@ -8,8 +8,11 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import model.Admin;
 import model.EventOrganizer;
+import model.Guest;
 import model.User;
+import model.Vendor;
 import controller.UserController;
 
 public class LoginView {
@@ -58,22 +61,43 @@ public class LoginView {
 
                 // Redirect based on user role
                 switch (user.getRole()) {
-                    case "Guest":
-                        new GuestHomeView(user).start(stage); // Pass UserController and User to the Guest view
-                        break;
-                    case "Event Organizer":
-                        new EventOrganizerHomeView(user).start(stage); // Pass UserController and User to the Event Organizer view
-                        break;
-                    case "Admin":
-                        new AdminHomeView(user).start(stage); // Pass UserController and User to the Admin view
-                        break;
-                    case "Vendor":
-                        new VendorHomeView(user).start(stage); // Pass UserController and User to the Vendor view
-                        break;
-                    default:
-                        showAlert(Alert.AlertType.ERROR, "Login Error", "Unknown user role: " + user.getRole()); // Handle unknown roles
-                        break;
-                }
+                case "Guest":
+                    if (user instanceof Guest) {
+                        new GuestHomeView((Guest) user).start(stage); // Cast to Guest and pass it to the Guest view
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Login Error", "User is not a Guest.");
+                    }
+                    break;
+
+                case "Event Organizer":
+                    if (user instanceof EventOrganizer) {
+                        new EventOrganizerHomeView((EventOrganizer) user).start(stage); // Cast to EventOrganizer and pass it to the Event Organizer view
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Login Error", "User is not an Event Organizer.");
+                    }
+                    break;
+
+                case "Admin":
+                    if (user instanceof Admin) {
+                        new AdminHomeView((Admin) user).start(stage); // Cast to Admin and pass it to the Admin view
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Login Error", "User is not an Admin.");
+                    }
+                    break;
+
+                case "Vendor":
+                    if (user instanceof Vendor) {
+                        new VendorHomeView((Vendor) user).start(stage); // Cast to Vendor and pass it to the Vendor view
+                    } else {
+                        showAlert(Alert.AlertType.ERROR, "Login Error", "User is not a Vendor.");
+                    }
+                    break;
+
+                default:
+                    showAlert(Alert.AlertType.ERROR, "Login Error", "Unknown user role: " + user.getRole()); // Handle unknown roles
+                    break;
+            }
+
             } catch (IllegalArgumentException ex) {
                 showAlert(Alert.AlertType.ERROR, "Login Error", ex.getMessage()); // Show error if login fails
             }

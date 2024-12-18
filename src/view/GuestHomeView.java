@@ -9,12 +9,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import model.Guest;
 import model.User;
 
 public class GuestHomeView extends Application {
-	private User user;
-	public GuestHomeView(User user) {
-		this.user = user;
+	private Guest guest;
+	public GuestHomeView(Guest guest) {
+		this.guest = guest;
 	}
 	public GuestHomeView() {
 	}

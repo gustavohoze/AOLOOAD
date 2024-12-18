@@ -3,7 +3,9 @@ package controller;
 import model.EventOrganizer;
 import util.DatabaseConnection;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 public class EventOrganizerController {
 
@@ -22,7 +24,7 @@ public class EventOrganizerController {
     // Create an event
     public boolean createEvent(String eventName, String date, String location, String description, String organizerID) {
         if (checkCreateEventInput(eventName, date, location, description)) {
-            String eventId = "E" + eventOrganizer.getEventsCreated().size() + 1; // Unique ID for new event
+            String eventId = UUID.randomUUID().toString(); // Unique ID for new event
             eventOrganizer.addEvent(eventId);
 
             try {
@@ -52,7 +54,6 @@ public class EventOrganizerController {
         System.out.println("List of events organized by User ID " + userID + ":");
         String query = "SELECT event_id, event_name, event_date, event_location FROM events WHERE organizer_id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-
             stmt.setString(1, userID);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
@@ -151,22 +152,43 @@ public class EventOrganizerController {
 
     // Check input for creating an event
     public boolean checkCreateEventInput(String eventName, String date, String location, String description) {
+        // Validate event name (cannot be empty)
         if (eventName == null || eventName.isEmpty()) {
             System.out.println("Event name cannot be empty.");
             return false;
         }
+
+        // Validate event date (cannot be empty and must be a future date)
         if (date == null || date.isEmpty()) {
             System.out.println("Event date cannot be empty.");
             return false;
         }
+
+        // Check if the date is in the future
+        try {
+            LocalDate eventDate = LocalDate.parse(date); // Parsing the date to check format
+            if (eventDate.isBefore(LocalDate.now())) {
+                System.out.println("Event date must be in the future.");
+                return false;
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid date format. Please use YYYY-MM-DD.");
+            return false;
+        }
+
+        // Validate event location (cannot be empty and must be at least 5 characters long)
         if (location == null || location.isEmpty() || location.length() < 5) {
             System.out.println("Event location must be at least 5 characters long.");
             return false;
         }
+
+        // Validate event description (cannot be empty and must be at most 200 characters)
         if (description == null || description.isEmpty() || description.length() > 200) {
             System.out.println("Event description must be between 1 and 200 characters.");
             return false;
         }
+
+        // All validations passed
         return true;
     }
 

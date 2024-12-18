@@ -14,7 +14,7 @@ public class DatabaseConnection {
 
     private DatabaseConnection() throws SQLException {
     	try {
-    	    Class.forName("com.mysql.cj.jdbc.Driver"); // Explicitly load the driver
+    	    Class.forName("com.mysql.cj.jdbc.Driver");
     	    this.connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
     	} catch (ClassNotFoundException e) {
     	    throw new SQLException("MySQL Driver not found. Ensure it's in the classpath.", e);

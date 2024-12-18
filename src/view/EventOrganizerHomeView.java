@@ -2,6 +2,8 @@ package view;
 
 import java.sql.Connection;
 
+import javax.swing.JOptionPane;
+
 import controller.EventOrganizerController;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -16,11 +18,12 @@ import model.EventOrganizer;
 import model.User;
 
 public class EventOrganizerHomeView extends Application {
-	private User user;
-	private EventOrganizerController controller = new EventOrganizerController((EventOrganizer) user);
+	private EventOrganizer eventOrganizer;
+	private EventOrganizerController controller;
 	
-	public EventOrganizerHomeView(User user) {
-		this.user = user;
+	public EventOrganizerHomeView(EventOrganizer eventOrganizer) {
+		this.eventOrganizer = eventOrganizer;
+		this.controller = new EventOrganizerController(eventOrganizer);
 	}
 
     @Override
@@ -58,7 +61,22 @@ public class EventOrganizerHomeView extends Application {
         createEventButton.setPrefWidth(300);
         
 //        Set button functionality
-        viewEventsButton.setOnAction(e->controller.viewOrganizedEvents(user.getId()));
+        viewEventsButton.setOnAction(e->controller.viewOrganizedEvents(eventOrganizer.getId()));
+        createEventButton.setOnAction(e->{
+        	String eventName = "";
+        	String date= "";
+        	String location= "";
+        	String description= "";
+        	do {
+        		eventName = JOptionPane.showInputDialog("Enter Event Name:");
+                date = JOptionPane.showInputDialog("Enter Event Date [YYYY-MM-DD]:");
+                location = JOptionPane.showInputDialog("Enter Event Location:");
+                description = JOptionPane.showInputDialog("Enter Event Description:");
+        	}
+        	while(controller.createEvent(eventName, date, location, description, eventOrganizer.getId()) == false) ;
+
+        // Call createEvent method with the user input data
+        ;});
 
         // Layout Setup
         VBox layout = new VBox(10);
