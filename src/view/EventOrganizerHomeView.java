@@ -1,6 +1,7 @@
 package view;
 
 import java.sql.Connection;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 
@@ -62,6 +63,10 @@ public class EventOrganizerHomeView extends Application {
         
 //        Set button functionality
         viewEventsButton.setOnAction(e->controller.viewOrganizedEvents(eventOrganizer.getId()));
+        viewEventDetailsButton.setOnAction(e->{
+        	controller.viewOrganizedEvents(eventOrganizer.getId());
+        	
+        	});
         createEventButton.setOnAction(e->{
         	String eventName = "";
         	String date= "";
@@ -75,8 +80,35 @@ public class EventOrganizerHomeView extends Application {
         	}
         	while(controller.createEvent(eventName, date, location, description, eventOrganizer.getId()) == false) ;
 
-        // Call createEvent method with the user input data
         ;});
+        editEventNameButton.setOnAction(e->{
+        	controller.viewOrganizedEvents(eventOrganizer.getId());
+        	String eventID = JOptionPane.showInputDialog("Enter Event ID:");
+        	String eventName = JOptionPane.showInputDialog("Enter Event Name:");
+        	controller.editEventName(eventID,eventName);
+        });
+        addVendorsButton.setOnAction(e->{
+        	controller.viewOrganizedEvents(eventOrganizer.getId());
+        	String eventID = JOptionPane.showInputDialog("Enter Event ID:");
+        	List<String> vendors = controller.getVendors(eventID);
+        	for(String vendor : vendors) {
+        		System.out.println(vendor);
+        	}
+        	String username = JOptionPane.showInputDialog("Enter Username:");
+        	controller.addVendor(controller.getUserIdByUsername(username), eventID);
+        });
+        
+        addGuestsButton.setOnAction(e->{
+        	controller.viewOrganizedEvents(eventOrganizer.getId());
+        	String eventID = JOptionPane.showInputDialog("Enter Event ID:");
+        	List<String> guests = controller.getGuests(eventID);
+        	for(String guest : guests) {
+        		System.out.println(guest);
+        	}
+        	String username = JOptionPane.showInputDialog("Enter Username:");
+        	controller.addGuest(controller.getUserIdByUsername(username), eventID);
+        });
+
 
         // Layout Setup
         VBox layout = new VBox(10);
@@ -85,7 +117,7 @@ public class EventOrganizerHomeView extends Application {
         layout.getChildren().addAll(
                 titleLabel,
                 new Separator(),
-                viewEventsButton,
+//                viewEventsButton,
                 viewEventDetailsButton,
                 addVendorsButton,
                 addGuestsButton,

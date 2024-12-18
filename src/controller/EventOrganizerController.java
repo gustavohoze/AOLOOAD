@@ -4,6 +4,7 @@ import model.EventOrganizer;
 import util.DatabaseConnection;
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -89,35 +90,64 @@ public class EventOrganizerController {
 
     // Get list of guests for a particular event
     public List<String> getGuests(String eventID) {
-        String query = "SELECT guest_name FROM guests WHERE event_id = ?";
+        List<String> guests = new ArrayList<>();
+        // Query to fetch all users with role 'Guest' who are not yet added to the event
+        String query = "SELECT u.username FROM Users u " +
+                       "WHERE u.role = 'Guest' " +
+                       "AND NOT EXISTS (SELECT 1 FROM Event_Guest eg WHERE eg.user_id = u.user_id AND eg.event_id = ?)";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, eventID);
+            stmt.setString(1, eventID);  // Set the eventID in the query
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                String guestName = rs.getString("guest_name");
-                System.out.println("Guest: " + guestName);
-            }
-        } catch (SQLException e)            {
-            e.printStackTrace();
-        }
-        return null;  // Return actual list when implemented
-    }
-
-    // Get list of vendors for a particular event
-    public List<String> getVendors(String eventID) {
-        String query = "SELECT vendor_name FROM vendors WHERE event_id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
-            stmt.setString(1, eventID);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                String vendorName = rs.getString("vendor_name");
-                System.out.println("Vendor: " + vendorName);
+                String guestName = rs.getString("username");
+                guests.add(guestName);  // Add to the list of guests
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;  // Return actual list when implemented
+        return guests;  // Return the list of available guest usernames
     }
+
+
+    // Get list of vendors for a particular event
+    public List<String> getVendors(String eventID) {
+        List<String> vendors = new ArrayList<>();
+        // Query to fetch all users with role 'Vendor' who are not yet added to the event
+        String query = "SELECT u.username FROM Users u " +
+                       "WHERE u.role = 'Vendor' " +
+                       "AND NOT EXISTS (SELECT 1 FROM Event_Vendor ev WHERE ev.user_id = u.user_id AND ev.event_id = ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, eventID);  // Set the eventID in the query
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                String vendorName = rs.getString("username");
+                vendors.add(vendorName);  // Add to the list of vendors
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return vendors;  // Return the list of available vendor usernames
+    }
+    public String getUserIdByUsername(String username) {
+        String userId = null;
+        String query = "SELECT user_id FROM Users WHERE username = ?";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, username);  // Set the username in the query
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                userId = rs.getString("user_id");  // Retrieve the userId
+            } else {
+                System.out.println("User not found with username: " + username);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return userId;  // Return the userId or null if not found
+    }
+
 
     // Get guests by transaction ID
     public void getGuestsByTransactionID(String eventID) {
@@ -194,16 +224,18 @@ public class EventOrganizerController {
 
     // Add vendor to event (ensure vendor hasn't already been added)
     public void addVendor(String userID, String eventID) {
-        String checkQuery = "SELECT COUNT(*) FROM users WHERE user_id = ? AND event_id = ?";
+        // Check if the vendor is already associated with the event
+        String checkQuery = "SELECT COUNT(*) FROM Event_Vendor WHERE event_id = ? AND user_id = ?";
         try (PreparedStatement checkStmt = connection.prepareStatement(checkQuery)) {
-            checkStmt.setString(1, userID);
-            checkStmt.setString(2, eventID);
+            checkStmt.setString(1, eventID);
+            checkStmt.setString(2, userID);
             ResultSet checkRs = checkStmt.executeQuery();
             if (checkRs.next() && checkRs.getInt(1) == 0) {
-                String query = "INSERT INTO users (user_id, event_id) VALUES (?, ?)";
+                // If not already a vendor, add to Event_Vendor table
+                String query = "INSERT INTO Event_Vendor (event_id, user_id) VALUES (?, ?)";
                 try (PreparedStatement stmt = connection.prepareStatement(query)) {
-                    stmt.setString(1, userID);
-                    stmt.setString(2, eventID);
+                    stmt.setString(1, eventID);
+                    stmt.setString(2, userID);
                     stmt.executeUpdate();
                     System.out.println("Vendor added to event ID: " + eventID);
                 }
@@ -217,16 +249,18 @@ public class EventOrganizerController {
 
     // Add guest to event (ensure guest hasn't already been added)
     public void addGuest(String userID, String eventID) {
-        String checkQuery = "SELECT COUNT(*) FROM users WHERE user_id = ? AND event_id = ?";
+        // Check if the guest is already associated with the event
+        String checkQuery = "SELECT COUNT(*) FROM Event_Guest WHERE event_id = ? AND user_id = ?";
         try (PreparedStatement checkStmt = connection.prepareStatement(checkQuery)) {
-            checkStmt.setString(1, userID);
-            checkStmt.setString(2, eventID);
+            checkStmt.setString(1, eventID);
+            checkStmt.setString(2, userID);
             ResultSet checkRs = checkStmt.executeQuery();
             if (checkRs.next() && checkRs.getInt(1) == 0) {
-                String query = "INSERT INTO guests (guest_id, event_id) VALUES (?, ?)";
+                // If not already a guest, add to Event_Guest table
+                String query = "INSERT INTO Event_Guest (event_id, user_id) VALUES (?, ?)";
                 try (PreparedStatement stmt = connection.prepareStatement(query)) {
-                    stmt.setString(1, userID);
-                    stmt.setString(2, eventID);
+                    stmt.setString(1, eventID);
+                    stmt.setString(2, userID);
                     stmt.executeUpdate();
                     System.out.println("Guest added to event ID: " + eventID);
                 }
