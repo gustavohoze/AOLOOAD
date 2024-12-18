@@ -87,6 +87,50 @@ public class EventOrganizerController {
             e.printStackTrace();
         }
     }
+    public void displayInvitedVendorsAndGuests(String eventID) {
+        List<String> invitedVendors = new ArrayList<>();
+        List<String> invitedGuests = new ArrayList<>();
+
+        // Query to fetch all vendors invited to the event
+        String vendorQuery = "SELECT u.username FROM Users u " +
+                             "JOIN Event_Vendor ev ON u.user_id = ev.user_id " +
+                             "WHERE ev.event_id = ?";
+        try (PreparedStatement vendorStmt = connection.prepareStatement(vendorQuery)) {
+            vendorStmt.setString(1, eventID);  // Set the eventID in the query
+            ResultSet vendorRs = vendorStmt.executeQuery();
+            while (vendorRs.next()) {
+                invitedVendors.add(vendorRs.getString("username"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Query to fetch all guests invited to the event
+        String guestQuery = "SELECT u.username FROM Users u " +
+                            "JOIN Event_Guest eg ON u.user_id = eg.user_id " +
+                            "WHERE eg.event_id = ?";
+        try (PreparedStatement guestStmt = connection.prepareStatement(guestQuery)) {
+            guestStmt.setString(1, eventID);  // Set the eventID in the query
+            ResultSet guestRs = guestStmt.executeQuery();
+            while (guestRs.next()) {
+                invitedGuests.add(guestRs.getString("username"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Display the list of invited vendors and guests
+        System.out.println("Invited Vendors for Event ID: " + eventID);
+        for (String vendor : invitedVendors) {
+            System.out.println(vendor);
+        }
+
+        System.out.println("Invited Guests for Event ID: " + eventID);
+        for (String guest : invitedGuests) {
+            System.out.println(guest);
+        }
+    }
+
 
     // Get list of guests for a particular event
     public List<String> getGuests(String eventID) {

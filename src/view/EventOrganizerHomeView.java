@@ -65,7 +65,8 @@ public class EventOrganizerHomeView extends Application {
         viewEventsButton.setOnAction(e->controller.viewOrganizedEvents(eventOrganizer.getId()));
         viewEventDetailsButton.setOnAction(e->{
         	controller.viewOrganizedEvents(eventOrganizer.getId());
-        	
+        	String eventID = JOptionPane.showInputDialog("Enter Event ID to show the guest and vendor invited:");
+        	controller.displayInvitedVendorsAndGuests(eventID);
         	});
         createEventButton.setOnAction(e->{
         	String eventName = "";
@@ -117,7 +118,7 @@ public class EventOrganizerHomeView extends Application {
         layout.getChildren().addAll(
                 titleLabel,
                 new Separator(),
-//                viewEventsButton,
+                viewEventsButton,
                 viewEventDetailsButton,
                 addVendorsButton,
                 addGuestsButton,
